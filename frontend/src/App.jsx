@@ -8,6 +8,7 @@ import Character from './pages/Character';
 import Achievements from './pages/Achievements';
 import Shop from './pages/Shop';
 import Inventory from './pages/Inventory';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 export default function App() {
@@ -15,17 +16,52 @@ export default function App() {
     <UserProvider>
       <Router>
         <Routes>
-          {/* Default route is now Login */}
-          <Route path="/" element={<Login />} />
+          {/* Public Authentication Routes */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* Protected Dashboard & Feature Routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/character" element={<Character />} />
-          <Route path="/achievements" element={<Achievements />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/inventory" element={<Inventory />} />
+          {/* Protected Dashboard & Feature Routes (Requires Active JWT Session) */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/character"
+            element={
+              <ProtectedRoute>
+                <Character />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/achievements"
+            element={
+              <ProtectedRoute>
+                <Achievements />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shop"
+            element={
+              <ProtectedRoute>
+                <Shop />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inventory"
+            element={
+              <ProtectedRoute>
+                <Inventory />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Fallback redirect */}
           <Route path="*" element={<Navigate to="/login" replace />} />

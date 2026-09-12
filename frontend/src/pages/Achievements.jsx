@@ -23,7 +23,7 @@ export default function Achievements() {
         return JSON.parse(cached);
       } catch {}
     }
-    return { level: 1, streak: 1, str: 15, int: 20, wis: 12, agi: 14, hp: 100 };
+    return { level: 1, streak: 0, str: 0, int: 0, wis: 0, agi: 0, hp: 100 };
   });
 
   useEffect(() => {
