@@ -1,0 +1,338 @@
+.pokemon-login-container {
+  min-height: 100vh;
+  width: 100%;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Retro Grid Overlay */
+.pokemon-login-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(239, 68, 68, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(239, 68, 68, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+
+/* Pokédex Card Casing */
+.pokedex-card {
+  width: 100%;
+  max-width: 440px;
+  background: #18181b;
+  border: 4px solid #dc2626; /* Pokédex Red Border */
+  border-radius: 24px;
+  box-shadow: 
+    0 0 35px rgba(220, 38, 38, 0.25),
+    inset 0 0 15px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  z-index: 10;
+  position: relative;
+}
+
+/* Pokédex Top Header Bar */
+.pokedex-header {
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 4px solid #991b1b;
+}
+
+/* Big Blue Lens */
+.big-lens {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #60a5fa, #1d4ed8, #1e40af);
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 12px #3b82f6;
+  position: relative;
+}
+.big-lens::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+/* Small LED Indicator Lights */
+.led-group {
+  display: flex;
+  gap: 8px;
+}
+.led {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+}
+.led.red { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+.led.yellow { background: #eab308; box-shadow: 0 0 6px #eab308; }
+.led.green { background: #22c55e; box-shadow: 0 0 6px #22c55e; animation: pulse-green 1.5s infinite; }
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.9); }
+}
+
+/* Pokédex Screen Body */
+.pokedex-body {
+  padding: 1.75rem;
+}
+
+/* Pokeball Badge Section */
+.pokeball-badge-wrapper {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+.pokeball-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: #27272a;
+  border: 3px solid #3f3f46;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transition: transform 0.3s ease;
+}
+.pokeball-badge:hover {
+  transform: rotate(180deg) scale(1.05);
+}
+
+.trainer-title {
+  color: #facc15; /* Electric Yellow */
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 0.5rem 0 0.2rem 0;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+.trainer-subtitle {
+  color: #a1a1aa;
+  font-size: 0.825rem;
+  margin: 0;
+}
+
+/* Alert Error Box */
+.poke-error-alert {
+  background: rgba(127, 29, 29, 0.8);
+  border: 1px solid #ef4444;
+  color: #fecaca;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Form Styles */
+.poke-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.input-label {
+  display: block;
+  color: #e4e4e7;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.poke-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.poke-input-icon {
+  position: absolute;
+  left: 12px;
+  color: #71717a;
+  display: flex;
+  align-items: center;
+}
+
+.poke-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  background: #09090b;
+  border: 2px solid #27272a;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.poke-input:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.25);
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #71717a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.password-toggle-btn:hover {
+  color: #facc15;
+}
+
+/* Remember Me Checkbox */
+.remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a1a1aa;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.checkbox-label input {
+  accent-color: #ef4444;
+  width: 16px;
+  height: 16px;
+}
+.forgot-link {
+  color: #facc15;
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+.btn-primary-poke {
+  width: 100%;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: 2px solid #fca5a5;
+  border-radius: 14px;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary-poke:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.6);
+}
+.btn-primary-poke:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1.25rem 0;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: #27272a;
+}
+.divider-text {
+  color: #52525b;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* Guest Trainer Demo Button */
+.btn-guest-poke {
+  width: 100%;
+  padding: 0.7rem;
+  background: #27272a;
+  border: 2px dashed #facc15;
+  border-radius: 12px;
+  color: #facc15;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-guest-poke:hover {
+  background: rgba(250, 204, 21, 0.1);
+  border-style: solid;
+}
+
+/* Footer Link */
+.pokedex-footer {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #a1a1aa;
+}
+.signup-link {
+  color: #ef4444;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+}
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+/* Spinner */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

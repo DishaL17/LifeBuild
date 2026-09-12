@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * LifeBuild Helper Utilities
  */
@@ -48,3 +49,6 @@ export function formatNumber(num = 0) {
 export function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
+=======
+
+>>>>>>> 96ae548fbe03e2e51ff19e8d491968e1e494b6dd

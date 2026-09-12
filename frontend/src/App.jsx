@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -12,52 +13,47 @@ import Shop from './pages/Shop';
 import Inventory from './pages/Inventory';
 import './App.css';
 
-function MainApp() {
-  const [currentPage, setCurrentPage] = useState('dashboard');
+function AppContent() {
+  const location = useLocation();
   const [currentUser, setCurrentUser] = useState({
-    username: 'Valerius',
+    username: 'Ash Ketchum',
     level: 3,
   });
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setCurrentPage('landing');
   };
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'landing':
-        return <Landing onNavigate={setCurrentPage} />;
-      case 'login':
-        return <Login onNavigate={setCurrentPage} />;
-      case 'signup':
-        return <Signup onNavigate={setCurrentPage} />;
-      case 'dashboard':
-        return <Dashboard />;
-      case 'character':
-        return <Character />;
-      case 'achievements':
-        return <Achievements />;
-      case 'shop':
-        return <Shop />;
-      case 'inventory':
-        return <Inventory />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
-  const isAuthPage = ['landing', 'login', 'signup'].includes(currentPage);
+  // Hide Navbar & Sidebar on auth pages for a full-screen Pokedex interface
+  const authPaths = ['/', '/landing', '/login', '/signup'];
+  const isAuthPage = authPaths.includes(location.pathname);
 
   return (
     <div className="app-layout">
-      <Navbar user={currentUser} onLogout={handleLogout} />
+      {!isAuthPage && (
+        <Navbar user={currentUser} onLogout={handleLogout} />
+      )}
+      
       <div className="app-body">
         {!isAuthPage && (
-          <Sidebar activeTab={currentPage} onSelectTab={setCurrentPage} />
+          <Sidebar />
         )}
+        
         <main className={`app-main ${isAuthPage ? 'full-width' : ''}`}>
-          {renderPage()}
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/landing" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/character" element={<Character />} />
+            <Route path="/achievements" element={<Achievements />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/inventory" element={<Inventory />} />
+            
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
         </main>
       </div>
     </div>
@@ -67,7 +63,9 @@ function MainApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <MainApp />
+      <Router>
+        <AppContent />
+      </Router>
     </AuthProvider>
   );
 }
