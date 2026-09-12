@@ -41,13 +41,32 @@ export default function Signup() {
     setError('');
 
     try {
-      // Simulate backend Trainer creation delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const res = await fetch(`${API_BASE}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          specialty: formData.specialty,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create Trainer profile');
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
       // Navigate to login after registration
       navigate('/login');
     } catch (err) {
-      setError('Failed to create Trainer profile. Try again!');
+      setError(err.message || 'Failed to create Trainer profile. Try again!');
     } finally {
       setLoading(false);
     }

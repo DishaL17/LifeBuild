@@ -35,26 +35,77 @@ export default function Login() {
     setError('');
 
     try {
-      // Simulate backend authentication delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Invalid Trainer ID or Passcode!');
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
       // Navigate cleanly to /dashboard
       navigate('/dashboard');
     } catch (err) {
-      setError('Invalid Trainer ID or Passcode!');
+      setError(err.message || 'Invalid Trainer ID or Passcode!');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGuestLogin = () => {
+  const handleGuestLogin = async () => {
     setLoading(true);
-    setFormData({ email: 'ash.ketchum@liferpg.io', password: 'pika', rememberMe: true });
-    
-    setTimeout(() => {
-      setLoading(false);
+    setError('');
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const guestUser = {
+      username: 'ash_ketchum',
+      email: 'ash.ketchum@liferpg.io',
+      password: 'pikapassword123',
+      specialty: 'electric',
+    };
+
+    try {
+      // Attempt login
+      let res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: guestUser.email, password: guestUser.password }),
+      });
+
+      let data = await res.json();
+
+      // If guest doesn't exist yet, auto-create guest account
+      if (!res.ok) {
+        res = await fetch(`${API_BASE}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(guestUser),
+        });
+        data = await res.json();
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/dashboard');
+      }
+    } catch {
+      // Fallback
       navigate('/dashboard');
-    }, 800);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

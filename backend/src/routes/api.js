@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
+import authRoutes from './authRoutes.js';
 
 const router = Router();
+
+// Sub-routes
+router.use('/auth', authRoutes);
 
 router.get('/health', (req, res) => {
   const dbStates = ['disconnected', 'connected', 'connecting', 'disconnecting'];
