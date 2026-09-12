@@ -112,7 +112,7 @@ export default function Login() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="red@pallettown.com"
+                  placeholder="Enter Your Email ID"
                   className="poke-input"
                 />
               </div>
@@ -169,7 +169,7 @@ export default function Login() {
               ) : (
                 <>
                   <span>CHOOSE TRAINER & START</span>
-                  <span>⚡</span>
+                  
                 </>
               )}
             </button>
@@ -184,7 +184,7 @@ export default function Login() {
 
           {/* Guest Trainer Pass for Judges */}
           <button type="button" onClick={handleGuestLogin} disabled={loading} className="btn-guest-poke">
-            <span>⚡ QUICK GUEST TRAINER PASS</span>
+            <span>QUICK GUEST TRAINER PASS</span>
           </button>
 
           {/* Footer Link */}

@@ -1,0 +1,71 @@
+/* ==========================================
+   POKÉMON TRAINER REGISTRATION STYLES
+   ========================================== */
+
+.pokemon-signup-container {
+  min-height: 100vh;
+  width: 100%;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.pokemon-signup-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(239, 68, 68, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(239, 68, 68, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+
+.pokedex-signup-card {
+  width: 100%;
+  max-width: 460px;
+  background: #18181b;
+  border: 4px solid #dc2626;
+  border-radius: 24px;
+  box-shadow: 
+    0 0 35px rgba(220, 38, 38, 0.25),
+    inset 0 0 15px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  z-index: 10;
+  position: relative;
+}
+
+.poke-select {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  background: #09090b;
+  border: 2px solid #27272a;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.poke-select:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.25);
+}
+
+.login-link {
+  color: #facc15;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 6px;
+}
+.login-link:hover {
+  text-decoration: underline;
+}
