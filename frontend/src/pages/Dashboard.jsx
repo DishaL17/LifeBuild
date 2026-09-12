@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { soundEngine } from '../utils/soundeffects';
+import { useUser } from '../context/UserContext';
 import './Dashboard.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -40,20 +41,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [isMuted, setIsMuted] = useState(false);
 
-  const [user, setUser] = useState({
-    username: 'Trainer',
-    avatar: '🧢',
-    level: 1,
-    xp: 0,
-    gold: 150,
-    streak: 1,
-    companionMon: 'charmander',
-    str: 15,
-    int: 20,
-    wis: 12,
-    agi: 14,
-    hp: 100,
-  });
+  const { user, setUser } = useUser();
 
   const [quests, setQuests] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -279,9 +267,33 @@ export default function Dashboard() {
               <div className="led yellow" />
               <div className="led green" />
             </div>
-            <button onClick={toggleSound} className="mute-btn">
-              {isMuted ? '🔇 SFX OFF' : '🔊 SFX ON'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginLeft: 'auto' }}>
+              <Link to="/character" style={{ background: '#27272a', color: '#facc15', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', textDecoration: 'none', border: '1px solid #3f3f46' }}>
+                🆔 License
+              </Link>
+              <Link to="/shop" style={{ background: '#27272a', color: '#facc15', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', textDecoration: 'none', border: '1px solid #3f3f46' }}>
+                🛒 Pokémart
+              </Link>
+              <Link to="/inventory" style={{ background: '#27272a', color: '#38bdf8', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', textDecoration: 'none', border: '1px solid #3f3f46' }}>
+                🎒 Backpack
+              </Link>
+              <Link to="/achievements" style={{ background: '#27272a', color: '#34d399', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', textDecoration: 'none', border: '1px solid #3f3f46' }}>
+                🏆 Badges
+              </Link>
+              <button onClick={toggleSound} className="mute-btn">
+                {isMuted ? '🔇' : '🔊'}
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
+                  navigate('/login');
+                }}
+                style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                Logout
+              </button>
+            </div>
           </div>
 
           <div className="pokedex-card-body">
@@ -334,10 +346,12 @@ export default function Dashboard() {
 
             </div>
 
-            <div style={{ textAlign: 'right' }}>
-              <Link to="/shop" className="shop-link-btn">
-                <span>🛒 ENTER POKÉMART SHOP</span>
-              </Link>
+            {/* Pokédex Quick Navigation Bar */}
+            <div className="pokedex-nav-hub">
+              <Link to="/character" className="nav-hub-btn">🆔 TRAINER LICENSE</Link>
+              <Link to="/inventory" className="nav-hub-btn">🎒 BACKPACK INVENTORY</Link>
+              <Link to="/achievements" className="nav-hub-btn">🏆 GYM BADGES</Link>
+              <Link to="/shop" className="nav-hub-btn gold">🛒 POKÉMART SHOP</Link>
             </div>
 
           </div>
@@ -364,31 +378,44 @@ export default function Dashboard() {
 
         {/* Quest List with Styled Cards */}
         <div className="quest-list">
-          {filteredQuests.map((q) => (
-            <div key={q.id} className={`quest-card ${q.completed ? 'completed' : ''}`}>
-              <div className="quest-left">
-                <button onClick={() => handleToggleQuest(q.id)} className={`quest-checkbox ${q.completed ? 'checked' : ''}`}>
-                  {q.completed ? '✓' : ''}
-                </button>
-                <div className="quest-details">
-                  <span className="quest-title-text">{q.title}</span>
-                  <div className="quest-badges">
-                    <span className={`attr-tag ${q.attribute}`}>{q.attribute.toUpperCase()}</span>
+          {filteredQuests.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: '#18181b', borderRadius: '12px', border: '1px dashed #3f3f46', width: '100%', gridColumn: '1 / -1' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📜</div>
+              <h3 style={{ color: '#facc15', margin: '0 0 0.4rem 0' }}>No Active Quests!</h3>
+              <p style={{ color: '#a1a1aa', fontSize: '0.85rem', margin: '0 0 1.25rem' }}>
+                Your daily quest log is clean. Click "+ ADD QUEST" above to add real-world habits or tasks!
+              </p>
+              <button onClick={() => setShowAddModal(true)} className="btn-add-quest" style={{ margin: '0 auto' }}>
+                <span>+ CREATE FIRST QUEST</span>
+              </button>
+            </div>
+          ) : (
+            filteredQuests.map((q) => (
+              <div key={q.id || q._id} className={`quest-card ${q.completed ? 'completed' : ''}`}>
+                <div className="quest-left">
+                  <button onClick={() => handleToggleQuest(q.id || q._id)} className={`quest-checkbox ${q.completed ? 'checked' : ''}`}>
+                    {q.completed ? '✓' : ''}
+                  </button>
+                  <div className="quest-details">
+                    <span className="quest-title-text">{q.title}</span>
+                    <div className="quest-badges">
+                      <span className={`attr-tag ${q.attribute}`}>{q.attribute.toUpperCase()}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="reward-right-group">
-                <div className="reward-info">
-                  <span className="reward-xp">+{q.xp} XP</span>
-                  <span className="reward-gold">+{q.gold} 💰</span>
+                <div className="reward-right-group">
+                  <div className="reward-info">
+                    <span className="reward-xp">+{q.xp} XP</span>
+                    <span className="reward-gold">+{q.gold} 💰</span>
+                  </div>
+                  <button onClick={() => handleDeleteQuest(q.id || q._id)} className="btn-delete-quest">
+                    Delete
+                  </button>
                 </div>
-                <button onClick={() => handleDeleteQuest(q.id)} className="btn-delete-quest">
-                  Delete
-                </button>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Gym Badges Showcase Section */}

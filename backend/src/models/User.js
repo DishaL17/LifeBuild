@@ -59,19 +59,19 @@ const userSchema = new mongoose.Schema(
     },
     gold: {
       type: Number,
-      default: 150,
+      default: 0,
     },
     currentStreak: {
       type: Number,
-      default: 1,
+      default: 0,
     },
     streak: {
       type: Number,
-      default: 1,
+      default: 0,
     },
     longestStreak: {
       type: Number,
-      default: 1,
+      default: 0,
     },
     lastActiveDate: {
       type: Date,
@@ -84,22 +84,22 @@ const userSchema = new mongoose.Schema(
       default: 'charmander', // charmander, pikachu, squirtle, bulbasaur
     },
 
-    // RPG Core Attributes (aligned with Dashboard & License)
+    // RPG Core Attributes (start at 0 for new trainers)
     str: {
       type: Number,
-      default: 15,
+      default: 0,
     },
     int: {
       type: Number,
-      default: 20,
+      default: 0,
     },
     wis: {
       type: Number,
-      default: 12,
+      default: 0,
     },
     agi: {
       type: Number,
-      default: 14,
+      default: 0,
     },
     hp: {
       type: Number,
@@ -107,11 +107,11 @@ const userSchema = new mongoose.Schema(
     },
     strength: {
       type: Number,
-      default: 15,
+      default: 0,
     },
     intellect: {
       type: Number,
-      default: 20,
+      default: 0,
     },
     vitality: {
       type: Number,
@@ -119,7 +119,7 @@ const userSchema = new mongoose.Schema(
     },
     discipline: {
       type: Number,
-      default: 14,
+      default: 0,
     },
 
     // Trainer Inventory

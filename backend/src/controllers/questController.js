@@ -1,27 +1,9 @@
 import Quest from '../models/Quest.js';
 import User from '../models/User.js';
 
-// Default starter quests for new trainers
-const STARTER_QUESTS = [
-  { title: 'Complete LeetCode Daily Challenge', attribute: 'int', difficulty: 'Medium', xp: 60, gold: 35, completed: false },
-  { title: 'Push Day Workout at Gym', attribute: 'str', difficulty: 'Hard', xp: 120, gold: 75, completed: false },
-  { title: 'Read 20 pages of System Design', attribute: 'wis', difficulty: 'Easy', xp: 25, gold: 15, completed: true },
-  { title: 'Drink 3L Water & 8 Hours Sleep', attribute: 'hp', difficulty: 'Easy', xp: 25, gold: 15, completed: false },
-];
-
 export const getQuests = async (req, res) => {
   try {
-    let quests = await Quest.find({ userId: req.user.id }).sort({ createdAt: -1 });
-
-    // If first time user, auto-seed starter quests
-    if (quests.length === 0) {
-      const seeded = STARTER_QUESTS.map((q) => ({
-        ...q,
-        userId: req.user.id,
-      }));
-      quests = await Quest.insertMany(seeded);
-    }
-
+    const quests = await Quest.find({ userId: req.user.id }).sort({ createdAt: -1 });
     return res.status(200).json({ quests });
   } catch (error) {
     console.error('getQuests error:', error);
