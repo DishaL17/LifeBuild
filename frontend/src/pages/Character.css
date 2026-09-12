@@ -1,0 +1,34 @@
+.character-container {
+  min-height: 100vh;
+  width: 100%;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
+  color: #f4f4f5;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.character-content {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.license-card {
+  background: #18181b;
+  border: 4px solid #facc15;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 0 30px rgba(250, 204, 21, 0.3);
+}
+
+.stat-row-item {
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
