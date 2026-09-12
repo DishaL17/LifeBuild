@@ -10,10 +10,10 @@ export default function Shop() {
     const cached = localStorage.getItem('user');
     if (cached) {
       try {
-        return JSON.parse(cached).gold ?? 150;
+        return JSON.parse(cached).gold ?? 0;
       } catch {}
     }
-    return 150;
+    return 0;
   });
 
   const [shopItems, setShopItems] = useState([
@@ -26,17 +26,20 @@ export default function Shop() {
 
   const [buyingId, setBuyingId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [popup, setPopup] = useState(null);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
 
+  const closePopup = () => setPopup(null);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    // 1. Fetch live gold
+    // 1. Fetch live player profile and gold
     fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -67,7 +70,8 @@ export default function Shop() {
     }
 
     if (gold < item.price) {
-      showToast(`⚠️ Insufficient PokéCoins! Need ${item.price} coins.`);
+      soundEngine.playClick();
+      setPopup({ success: false, item });
       return;
     }
 
@@ -100,6 +104,7 @@ export default function Shop() {
         } catch {}
       }
 
+      setPopup({ success: true, item });
       showToast(`🎉 ${data.message} Stored in Backpack!`);
     } catch (err) {
       showToast('⚠️ ' + (err.message || 'Purchase failed'));
@@ -131,25 +136,6 @@ export default function Shop() {
           </div>
         )}
 
-        {/* PokéCoins Balance Bar */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            background: '#18181b',
-            border: '1px solid #facc15',
-            borderRadius: '999px',
-            padding: '0.5rem 1.2rem',
-            marginBottom: '1rem',
-          }}
-        >
-          <span style={{ fontSize: '1.1rem' }}>💰</span>
-          <span style={{ color: '#facc15', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            {user.gold} PokéCoins
-          </span>
-        </div>
-
         <div className="shop-grid">
           {shopItems.map((item) => (
             <div key={item.id} className="shop-card">
@@ -159,11 +145,16 @@ export default function Shop() {
               <span style={{ color: '#facc15', fontWeight: 'bold' }}>💰 {item.price} PokéCoins</span>
               <button
                 className="btn-buy"
-                disabled={buyingId === item.id || gold < item.price}
+                disabled={buyingId === item.id}
                 onClick={() => handleBuy(item)}
-                style={{ opacity: gold < item.price ? 0.6 : 1, cursor: gold < item.price ? 'not-allowed' : 'pointer' }}
+                style={{
+                  opacity: gold < item.price ? 0.7 : 1,
+                  background: gold < item.price ? '#3f3f46' : '#eab308',
+                  color: gold < item.price ? '#a1a1aa' : '#000',
+                  cursor: 'pointer',
+                }}
               >
-                {buyingId === item.id ? 'BUYING...' : gold < item.price ? 'NEED MORE COINS' : 'BUY ITEM'}
+                {buyingId === item.id ? 'BUYING...' : gold < item.price ? `NEED 💰 ${item.price}` : 'BUY ITEM'}
               </button>
             </div>
           ))}
@@ -177,7 +168,7 @@ export default function Shop() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.7)',
+            background: 'rgba(0,0,0,0.75)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -191,13 +182,13 @@ export default function Shop() {
               border: `2px solid ${popup.success ? '#facc15' : '#ef4444'}`,
               borderRadius: '18px',
               padding: '2rem',
-              maxWidth: '340px',
+              maxWidth: '360px',
               width: '90%',
               textAlign: 'center',
               boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
             }}
           >
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
               {popup.success ? popup.item.icon : '❌'}
             </div>
             {popup.success ? (
@@ -210,16 +201,19 @@ export default function Shop() {
                 <p style={{ color: '#a1a1aa', fontSize: '0.85rem', marginTop: '0.6rem' }}>
                   {popup.item.desc}
                 </p>
+                <p style={{ color: '#38bdf8', fontSize: '0.8rem', marginTop: '0.4rem' }}>
+                  Stored safely in your 🎒 Backpack!
+                </p>
               </>
             ) : (
               <>
                 <h2 style={{ color: '#ef4444', margin: '0 0 0.5rem 0' }}>Not Enough PokéCoins!</h2>
                 <p style={{ color: '#e4e4e7', margin: 0 }}>
-                  <strong>{popup.item.name}</strong> costs 💰 {popup.item.price}, but you only have{' '}
-                  💰 {user.gold}.
+                  <strong>{popup.item.name}</strong> costs 💰 {popup.item.price}, but you currently have{' '}
+                  💰 {gold}.
                 </p>
                 <p style={{ color: '#a1a1aa', fontSize: '0.85rem', marginTop: '0.6rem' }}>
-                  Complete more quests to earn coins!
+                  Complete quests from your Quest Log to earn more PokéCoins!
                 </p>
               </>
             )}
@@ -230,7 +224,7 @@ export default function Shop() {
                 background: popup.success ? '#facc15' : '#27272a',
                 color: popup.success ? '#09090b' : '#fff',
                 border: 'none',
-                borderRadius: '12px',
+                borderRadius: '10px',
                 padding: '0.7rem 1.6rem',
                 fontWeight: 'bold',
                 cursor: 'pointer',

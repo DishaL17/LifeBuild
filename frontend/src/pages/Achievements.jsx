@@ -6,12 +6,12 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const BADGE_DEFINITIONS = [
   { id: 'boulder', name: 'Boulder Badge', desc: 'Reached Trainer Level 5', icon: '🪨', check: (u) => (u.level || 1) >= 5, progress: (u) => `Level ${u.level || 1} / 5` },
-  { id: 'cascade', name: 'Cascade Badge', desc: 'Reached 30 Attack (STR) Points', icon: '💧', check: (u) => (u.str || 15) >= 30, progress: (u) => `STR ${u.str || 15} / 30` },
-  { id: 'thunder', name: 'Thunder Badge', desc: 'Maintained 5-Day Active Streak', icon: '⚡', check: (u) => (u.streak || 1) >= 5, progress: (u) => `Streak ${u.streak || 1} / 5 days` },
-  { id: 'rainbow', name: 'Rainbow Badge', desc: 'Reached 30 Sp. Atk (INT) Points', icon: '🌈', check: (u) => (u.int || 20) >= 30, progress: (u) => `INT ${u.int || 20} / 30` },
-  { id: 'soul', name: 'Soul Badge', desc: 'Reached 30 Sp. Def (WIS) Points', icon: '🔮', check: (u) => (u.wis || 12) >= 30, progress: (u) => `WIS ${u.wis || 12} / 30` },
+  { id: 'cascade', name: 'Cascade Badge', desc: 'Reached 30 Attack (STR) Points', icon: '💧', check: (u) => (u.str ?? 0) >= 30, progress: (u) => `STR ${u.str ?? 0} / 30` },
+  { id: 'thunder', name: 'Thunder Badge', desc: 'Maintained 5-Day Active Streak', icon: '⚡', check: (u) => (u.streak ?? 0) >= 5, progress: (u) => `Streak ${u.streak ?? 0} / 5 days` },
+  { id: 'rainbow', name: 'Rainbow Badge', desc: 'Reached 30 Sp. Atk (INT) Points', icon: '🌈', check: (u) => (u.int ?? 0) >= 30, progress: (u) => `INT ${u.int ?? 0} / 30` },
+  { id: 'soul', name: 'Soul Badge', desc: 'Reached 30 Sp. Def (WIS) Points', icon: '🔮', check: (u) => (u.wis ?? 0) >= 30, progress: (u) => `WIS ${u.wis ?? 0} / 30` },
   { id: 'marsh', name: 'Marsh Badge', desc: 'Reached Trainer Level 15', icon: '🌀', check: (u) => (u.level || 1) >= 15, progress: (u) => `Level ${u.level || 1} / 15` },
-  { id: 'volcano', name: 'Volcano Badge', desc: 'Reached 30 Speed (AGI) Points', icon: '🌋', check: (u) => (u.agi || 14) >= 30, progress: (u) => `AGI ${u.agi || 14} / 30` },
+  { id: 'volcano', name: 'Volcano Badge', desc: 'Reached 30 Speed (AGI) Points', icon: '🌋', check: (u) => (u.agi ?? 0) >= 30, progress: (u) => `AGI ${u.agi ?? 0} / 30` },
   { id: 'earth', name: 'Earth Badge', desc: 'Reached Level 25 Master status', icon: '🌍', check: (u) => (u.level || 1) >= 25 || (u.unlockedBadges && u.unlockedBadges.includes('earth')), progress: (u) => `Level ${u.level || 1} / 25` },
 ];
 

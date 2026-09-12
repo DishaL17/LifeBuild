@@ -73,11 +73,11 @@ export const toggleQuest = async (req, res) => {
       user.gold = (user.gold || 0) + quest.gold;
 
       // Attributes boost
-      if (quest.attribute === 'str') user.str = (user.str || 15) + 2;
-      if (quest.attribute === 'int') user.int = (user.int || 20) + 2;
-      if (quest.attribute === 'wis') user.wis = (user.wis || 12) + 2;
-      if (quest.attribute === 'agi') user.agi = (user.agi || 14) + 2;
-      if (quest.attribute === 'hp') user.hp = (user.hp || 100) + 5;
+      if (quest.attribute === 'str') user.str = (user.str ?? 0) + 2;
+      if (quest.attribute === 'int') user.int = (user.int ?? 0) + 2;
+      if (quest.attribute === 'wis') user.wis = (user.wis ?? 0) + 2;
+      if (quest.attribute === 'agi') user.agi = (user.agi ?? 0) + 2;
+      if (quest.attribute === 'hp') user.hp = (user.hp ?? 100) + 5;
 
       // Check non-linear level-up threshold: 100 * level^1.5
       let xpNeeded = Math.floor(100 * Math.pow(user.level || 1, 1.5));
@@ -120,11 +120,11 @@ export const toggleQuest = async (req, res) => {
       user.gold = Math.max(0, (user.gold || 0) - quest.gold);
       user.currentXP = user.xp;
 
-      if (quest.attribute === 'str') user.str = Math.max(10, (user.str || 15) - 2);
-      if (quest.attribute === 'int') user.int = Math.max(10, (user.int || 20) - 2);
-      if (quest.attribute === 'wis') user.wis = Math.max(10, (user.wis || 12) - 2);
-      if (quest.attribute === 'agi') user.agi = Math.max(10, (user.agi || 14) - 2);
-      if (quest.attribute === 'hp') user.hp = Math.max(50, (user.hp || 100) - 5);
+      if (quest.attribute === 'str') user.str = Math.max(0, (user.str ?? 0) - 2);
+      if (quest.attribute === 'int') user.int = Math.max(0, (user.int ?? 0) - 2);
+      if (quest.attribute === 'wis') user.wis = Math.max(0, (user.wis ?? 0) - 2);
+      if (quest.attribute === 'agi') user.agi = Math.max(0, (user.agi ?? 0) - 2);
+      if (quest.attribute === 'hp') user.hp = Math.max(100, (user.hp ?? 100) - 5);
     }
 
     await quest.save();

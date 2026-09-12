@@ -13,13 +13,13 @@ export default function Character() {
         return {
           name: u.name || u.username || 'Trainer',
           level: u.level || 1,
-          streak: u.streak || 1,
-          str: u.str || 15,
-          int: u.int || 20,
-          wis: u.wis || 12,
-          agi: u.agi || 14,
-          hp: u.hp || 100,
-          gold: u.gold || 150,
+          streak: u.streak ?? 0,
+          str: u.str ?? 0,
+          int: u.int ?? 0,
+          wis: u.wis ?? 0,
+          agi: u.agi ?? 0,
+          hp: u.hp ?? 100,
+          gold: u.gold ?? 0,
           companion: u.companionMon || 'charmander',
         };
       } catch {
@@ -29,13 +29,13 @@ export default function Character() {
     return {
       name: 'Trainer',
       level: 1,
-      streak: 1,
-      str: 15,
-      int: 20,
-      wis: 12,
-      agi: 14,
+      streak: 0,
+      str: 0,
+      int: 0,
+      wis: 0,
+      agi: 0,
       hp: 100,
-      gold: 150,
+      gold: 0,
       companion: 'charmander',
     };
   });
@@ -53,13 +53,13 @@ export default function Character() {
           setTrainer({
             name: data.user.name || data.user.username || 'Trainer',
             level: data.user.level || 1,
-            streak: data.user.streak || 1,
-            str: data.user.str ?? 15,
-            int: data.user.int ?? 20,
-            wis: data.user.wis ?? 12,
-            agi: data.user.agi ?? 14,
+            streak: data.user.streak ?? 0,
+            str: data.user.str ?? 0,
+            int: data.user.int ?? 0,
+            wis: data.user.wis ?? 0,
+            agi: data.user.agi ?? 0,
             hp: data.user.hp ?? 100,
-            gold: data.user.gold ?? 150,
+            gold: data.user.gold ?? 0,
             companion: data.user.companionMon || 'charmander',
           });
           localStorage.setItem('user', JSON.stringify(data.user));

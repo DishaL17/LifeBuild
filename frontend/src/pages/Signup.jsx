@@ -63,8 +63,8 @@ export default function Signup() {
         localStorage.setItem('user', JSON.stringify(data.user));
       }
 
-      // Navigate to login after registration
-      navigate('/login');
+      // Navigate directly to dashboard with the newly created profile
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to create Trainer profile. Try again!');
     } finally {

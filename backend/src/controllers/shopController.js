@@ -69,17 +69,7 @@ export const getInventory = async (req, res) => {
       return res.status(404).json({ error: 'Trainer not found' });
     }
 
-    // If user has 0 inventory, give starter pack for testing
-    if (!user.inventory || user.inventory.length === 0) {
-      user.inventory = [
-        { itemId: 'rare_candy', name: 'Rare Candy', desc: 'Instantly grants +100 XP', icon: '🍬', qty: 2 },
-        { itemId: 'hyper_potion', name: 'Hyper Potion', desc: 'Restores +50 HP Stamina', icon: '🧪', qty: 3 },
-        { itemId: 'fire_stone', name: 'Fire Stone', desc: 'Boosts STR & INT stats', icon: '🔥', qty: 1 },
-      ];
-      await user.save();
-    }
-
-    return res.status(200).json({ inventory: user.inventory, gold: user.gold });
+    return res.status(200).json({ inventory: user.inventory || [], gold: user.gold || 0 });
   } catch (error) {
     console.error('getInventory error:', error);
     return res.status(500).json({ error: 'Failed to fetch inventory: ' + error.message });
@@ -125,12 +115,12 @@ export const useItem = async (req, res) => {
       user.hp = (user.hp || 100) + 50;
       effectMessage = 'Used Hyper Potion! +50 HP Stamina restored!';
     } else if (itemId === 'fire_stone') {
-      user.str = (user.str || 15) + 10;
-      user.int = (user.int || 20) + 10;
+      user.str = (user.str ?? 0) + 10;
+      user.int = (user.int ?? 0) + 10;
       effectMessage = 'Used Fire Stone! +10 STR & +10 INT permanently!';
     } else if (itemId === 'thunder_stone') {
-      user.agi = (user.agi || 14) + 10;
-      user.gold = (user.gold || 0) + 100;
+      user.agi = (user.agi ?? 0) + 10;
+      user.gold = (user.gold ?? 0) + 100;
       effectMessage = 'Used Thunder Stone! +10 AGI & +100 PokéCoins!';
     } else if (itemId === 'master_ball') {
       if (!user.unlockedBadges.includes('earth')) {
