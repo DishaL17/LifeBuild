@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { soundEngine } from '../utils/soundeffects';
+import { useUser } from '../context/UserContext';
 import './Dashboard.css';
 
 const STARTER_EVOLUTIONS = {
@@ -37,20 +38,7 @@ const GYM_BADGES = [
 export default function Dashboard() {
   const [isMuted, setIsMuted] = useState(false);
 
-  const [user, setUser] = useState({
-    username: 'Ash Ketchum',
-    avatar: '🧢',
-    level: 1,
-    xp: 45,
-    gold: 150,
-    streak: 5,
-    companionMon: 'charmander',
-    str: 15,
-    int: 20,
-    wis: 12,
-    agi: 14,
-    hp: 100,
-  });
+  const { user, setUser } = useUser();
 
   const [quests, setQuests] = useState([
     { id: 1, title: 'Complete LeetCode Daily Challenge', attribute: 'int', difficulty: 'Medium', xp: 60, gold: 35, completed: false },
@@ -193,11 +181,12 @@ export default function Dashboard() {
     setShowAddModal(false);
     triggerToast('📜 New Quest added!');
   };
-  const handleDeleteQuest = (id) => {       
-  soundEngine.playClick();
-  setQuests((prev) => prev.filter((q) => q.id !== id));
-  triggerToast('🗑️ Quest deleted!');
-};
+
+  const handleDeleteQuest = (id) => {
+    soundEngine.playClick();
+    setQuests((prev) => prev.filter((q) => q.id !== id));
+    triggerToast('🗑️ Quest deleted!');
+  };
 
   const handleSelectStarter = (starterKey) => {
     soundEngine.playClick();
@@ -276,10 +265,12 @@ export default function Dashboard() {
 
             </div>
 
-            <div style={{ textAlign: 'right' }}>
-              <Link to="/shop" className="shop-link-btn">
-                <span>🛒 ENTER POKÉMART SHOP</span>
-              </Link>
+            {/* Pokédex Quick Navigation Bar */}
+            <div className="pokedex-nav-hub">
+              <Link to="/character" className="nav-hub-btn">🆔 TRAINER LICENSE</Link>
+              <Link to="/inventory" className="nav-hub-btn">🎒 BACKPACK INVENTORY</Link>
+              <Link to="/achievements" className="nav-hub-btn">🏆 GYM BADGES</Link>
+              <Link to="/shop" className="nav-hub-btn gold">🛒 POKÉMART SHOP</Link>
             </div>
 
           </div>
