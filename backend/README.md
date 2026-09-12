@@ -1,10 +1,11 @@
 # LifeBuild - Backend
 
-Express-based backend API service for the LifeBuild application.
+Express-based backend API service with MongoDB (via Mongoose) for the LifeBuild application.
 
 ## Prerequisites
 - Node.js (v18+)
 - npm
+- MongoDB Atlas account (free cloud cluster) or a local MongoDB server
 
 ## Setup & Running
 
@@ -18,6 +19,9 @@ Express-based backend API service for the LifeBuild application.
    ```bash
    cp .env.example .env
    ```
+   Set `MONGODB_URI` in `.env` to your MongoDB connection string:
+   - **MongoDB Atlas (Cloud)**: `mongodb+srv://<username>:<password>@cluster0.mongodb.net/lifebuild?retryWrites=true&w=majority`
+   - **Local MongoDB**: `mongodb://localhost:27017/lifebuild`
 
 3. **Start development server** (with auto-reload):
    ```bash
@@ -31,4 +35,4 @@ Express-based backend API service for the LifeBuild application.
 
 ## Default Endpoints
 - `GET /`: API status message
-- `GET /api/health`: Service health check response
+- `GET /api/health`: Service & database health check response
