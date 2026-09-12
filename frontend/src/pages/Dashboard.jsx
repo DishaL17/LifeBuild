@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { soundEngine } from '../utils/soundeffects';
 import './Dashboard.css';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const STARTER_EVOLUTIONS = {
   charmander: [
@@ -35,15 +37,16 @@ const GYM_BADGES = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [isMuted, setIsMuted] = useState(false);
 
   const [user, setUser] = useState({
-    username: 'Ash Ketchum',
+    username: 'Trainer',
     avatar: '🧢',
     level: 1,
-    xp: 45,
+    xp: 0,
     gold: 150,
-    streak: 5,
+    streak: 1,
     companionMon: 'charmander',
     str: 15,
     int: 20,
@@ -52,21 +55,61 @@ export default function Dashboard() {
     hp: 100,
   });
 
-  const [quests, setQuests] = useState([
-    { id: 1, title: 'Complete LeetCode Daily Challenge', attribute: 'int', difficulty: 'Medium', xp: 60, gold: 35, completed: false },
-    { id: 2, title: 'Push Day Workout at Gym', attribute: 'str', difficulty: 'Hard', xp: 120, gold: 75, completed: false },
-    { id: 3, title: 'Read 20 pages of System Design', attribute: 'wis', difficulty: 'Easy', xp: 25, gold: 15, completed: true },
-    { id: 4, title: 'Drink 3L Water & 8 Hours Sleep', attribute: 'hp', difficulty: 'Easy', xp: 25, gold: 15, completed: false },
-  ]);
-
+  const [quests, setQuests] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [toast, setToast] = useState(null);
   const [isChangingStarter, setIsChangingStarter] = useState(false);
   const [showLevelUpModal, setShowLevelUpModal] = useState(false);
   const [evolutionData, setEvolutionData] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-
   const [newQuest, setNewQuest] = useState({ title: '', attribute: 'int', difficulty: 'Easy' });
+
+  // Fetch live user profile and quests on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    const loadData = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+
+        // 1. Fetch User Profile
+        const userRes = await fetch(`${API_BASE}/auth/me`, { headers });
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (userData.user) {
+            setUser((prev) => ({
+              ...prev,
+              ...userData.user,
+              avatar: userData.user.avatar || '🧢',
+              username: userData.user.name || userData.user.username || 'Trainer',
+            }));
+            localStorage.setItem('user', JSON.stringify(userData.user));
+          }
+        } else if (userRes.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login');
+          return;
+        }
+
+        // 2. Fetch Quests
+        const questsRes = await fetch(`${API_BASE}/quests`, { headers });
+        if (questsRes.ok) {
+          const questsData = await questsRes.json();
+          if (questsData.quests) {
+            setQuests(questsData.quests.map((q) => ({ ...q, id: q._id })));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
+      }
+    };
+
+    loadData();
+  }, [navigate]);
 
   const xpNeeded = Math.floor(100 * Math.pow(user.level, 1.5));
   const xpPercent = Math.min(100, Math.round((user.xp / xpNeeded) * 100));
@@ -92,118 +135,133 @@ export default function Dashboard() {
     setTimeout(() => setToast(null), 2500);
   };
 
-  // Complete / Uncheck Quest Handler
-  const handleToggleQuest = (id) => {
-    setQuests((prev) =>
-      prev.map((q) => {
-        if (q.id === id) {
-          const isCompleting = !q.completed;
+  // Complete / Uncheck Quest Handler (Syncs to MongoDB Atlas)
+  const handleToggleQuest = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE}/quests/${id}/toggle`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-          if (isCompleting) {
-            // CHECKING TASK: ADD XP, GOLD & STATS
-            soundEngine.playQuestComplete();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-            let newXp = user.xp + q.xp;
-            let newGold = user.gold + q.gold;
-            let newLevel = user.level;
-            let currentXpNeeded = Math.floor(100 * Math.pow(newLevel, 1.5));
+      if (data.quest) {
+        setQuests((prev) =>
+          prev.map((q) => (q.id === id || q._id === id ? { ...data.quest, id: data.quest._id } : q))
+        );
+      }
 
-            const updatedStats = { ...user };
-            if (q.attribute === 'str') updatedStats.str += 2;
-            if (q.attribute === 'int') updatedStats.int += 2;
-            if (q.attribute === 'wis') updatedStats.wis += 2;
-            if (q.attribute === 'hp') updatedStats.hp += 5;
+      if (data.user) {
+        const prevLevel = user.level;
+        setUser((prev) => ({
+          ...prev,
+          ...data.user,
+          username: data.user.name || data.user.username || prev.username,
+        }));
+        localStorage.setItem('user', JSON.stringify(data.user));
 
-            // Level Up Check
-            if (newXp >= currentXpNeeded) {
-              newLevel += 1;
-              newXp = newXp - currentXpNeeded;
+        if (data.quest.completed) {
+          soundEngine.playQuestComplete();
+          triggerToast(`⚡ +${data.quest.xp} XP & 💰 +${data.quest.gold} PokéCoins Earned!`);
+        } else {
+          soundEngine.playClick();
+          triggerToast(`⚡ -${data.quest.xp} XP & 💰 -${data.quest.gold} PokéCoins`);
+        }
 
-              const prevMon = getActiveMon(user.companionMon, user.level);
-              const nextMon = getActiveMon(user.companionMon, newLevel);
+        // Level Up Check
+        if (data.leveledUp || data.user.level > prevLevel) {
+          const prevMon = getActiveMon(user.companionMon, prevLevel);
+          const nextMon = getActiveMon(user.companionMon, data.user.level);
 
-              if (prevMon.id !== nextMon.id) {
-                setEvolutionData({ prev: prevMon, next: nextMon });
-                soundEngine.playEvolutionFanfare();
-              } else {
-                soundEngine.playLevelUp();
-              }
-
-              setShowLevelUpModal(true);
-            }
-
-            setUser({
-              ...updatedStats,
-              level: newLevel,
-              xp: newXp,
-              gold: newGold,
-            });
-
-            triggerToast(`⚡ +${q.xp} XP & 💰 +${q.gold} PokéCoins Earned!`);
+          if (prevMon.id !== nextMon.id) {
+            setEvolutionData({ prev: prevMon, next: nextMon });
+            soundEngine.playEvolutionFanfare();
           } else {
-            // UNCHECKING TASK: SUBTRACT XP, GOLD & STATS
-            soundEngine.playClick();
-
-            let newXp = Math.max(0, user.xp - q.xp);
-            let newGold = Math.max(0, user.gold - q.gold);
-
-            const updatedStats = { ...user };
-            if (q.attribute === 'str') updatedStats.str = Math.max(10, updatedStats.str - 2);
-            if (q.attribute === 'int') updatedStats.int = Math.max(10, updatedStats.int - 2);
-            if (q.attribute === 'wis') updatedStats.wis = Math.max(10, updatedStats.wis - 2);
-            if (q.attribute === 'hp') updatedStats.hp = Math.max(50, updatedStats.hp - 5);
-
-            setUser({
-              ...updatedStats,
-              xp: newXp,
-              gold: newGold,
-            });
-
-            triggerToast(`⚡ -${q.xp} XP & 💰 -${q.gold} PokéCoins`);
+            soundEngine.playLevelUp();
           }
 
-          return { ...q, completed: isCompleting };
+          setShowLevelUpModal(true);
         }
-        return q;
-      })
-    );
+      }
+    } catch (err) {
+      triggerToast('⚠️ ' + (err.message || 'Error updating quest'));
+    }
   };
 
-  const handleAddQuest = (e) => {
+  // Create Quest (Saves to MongoDB Atlas)
+  const handleAddQuest = async (e) => {
     e.preventDefault();
-    if (!newQuest.title) return;
+    if (!newQuest.title || !newQuest.title.trim()) return;
 
-    let xpReward = 25; let goldReward = 15;
-    if (newQuest.difficulty === 'Medium') { xpReward = 60; goldReward = 35; }
-    if (newQuest.difficulty === 'Hard') { xpReward = 120; goldReward = 75; }
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE}/quests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newQuest),
+      });
 
-    const questObj = {
-      id: Date.now(),
-      title: newQuest.title,
-      attribute: newQuest.attribute,
-      difficulty: newQuest.difficulty,
-      xp: xpReward,
-      gold: goldReward,
-      completed: false,
-    };
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-    setQuests([questObj, ...quests]);
-    setActiveFilter('all'); // 👈 Automatically switches tab to ALL QUESTS so you see your new quest instantly!
-    setNewQuest({ title: '', attribute: 'int', difficulty: 'Easy' });
-    setShowAddModal(false);
-    triggerToast('📜 New Quest added!');
+      setQuests((prev) => [{ ...data.quest, id: data.quest._id }, ...prev]);
+      setActiveFilter('all');
+      setNewQuest({ title: '', attribute: 'int', difficulty: 'Easy' });
+      setShowAddModal(false);
+      triggerToast('📜 New Quest saved to database!');
+    } catch (err) {
+      triggerToast('⚠️ ' + (err.message || 'Error creating quest'));
+    }
   };
-  const handleDeleteQuest = (id) => {       
-  soundEngine.playClick();
-  setQuests((prev) => prev.filter((q) => q.id !== id));
-  triggerToast('🗑️ Quest deleted!');
-};
 
-  const handleSelectStarter = (starterKey) => {
+  // Delete Quest (Deletes from MongoDB Atlas)
+  const handleDeleteQuest = async (id) => {
     soundEngine.playClick();
-    setUser({ ...user, companionMon: starterKey });
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE}/quests/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+      setQuests((prev) => prev.filter((q) => q.id !== id && q._id !== id));
+      triggerToast('🗑️ Quest deleted!');
+    } catch (err) {
+      triggerToast('⚠️ ' + (err.message || 'Error deleting quest'));
+    }
+  };
+
+  // Select Starter Pokemon (Syncs to MongoDB Atlas)
+  const handleSelectStarter = async (starterKey) => {
+    soundEngine.playClick();
+    setUser((prev) => ({ ...prev, companionMon: starterKey }));
     setIsChangingStarter(false);
     triggerToast(`Partner switched to ${STARTER_EVOLUTIONS[starterKey][0].name}!`);
+
+    const token = localStorage.getItem('token');
+    try {
+      await fetch(`${API_BASE}/auth/companion`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ companionMon: starterKey }),
+      });
+    } catch (err) {
+      console.error('Error updating companion in database:', err);
+    }
   };
 
   const filteredQuests = quests.filter((q) => activeFilter === 'all' || q.attribute === activeFilter);

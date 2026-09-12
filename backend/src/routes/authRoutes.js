@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login, getMe } from '../controllers/authController.js';
+import { signup, login, getMe, updateCompanion } from '../controllers/authController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = Router();
@@ -7,5 +7,6 @@ const router = Router();
 router.post('/signup', signup);
 router.post('/login', login);
 router.get('/me', protect, getMe);
+router.patch('/companion', protect, updateCompanion);
 
 export default router;

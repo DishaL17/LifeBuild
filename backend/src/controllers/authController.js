@@ -9,11 +9,36 @@ const generateToken = (id) => {
   );
 };
 
+const formatUser = (user) => ({
+  id: user._id,
+  username: user.username,
+  name: user.name || user.username,
+  email: user.email,
+  specialty: user.specialty,
+  characterClass: user.characterClass,
+  level: user.level || 1,
+  xp: user.xp ?? user.currentXP ?? 0,
+  currentXP: user.xp ?? user.currentXP ?? 0,
+  nextLevelXP: user.nextLevelXP || 100,
+  gold: user.gold ?? 150,
+  streak: user.streak ?? user.currentStreak ?? 1,
+  currentStreak: user.streak ?? user.currentStreak ?? 1,
+  companionMon: user.companionMon || 'charmander',
+  str: user.str ?? 15,
+  int: user.int ?? 20,
+  wis: user.wis ?? 12,
+  agi: user.agi ?? 14,
+  hp: user.hp ?? 100,
+  inventory: user.inventory || [],
+  unlockedBadges: user.unlockedBadges || [],
+  createdAt: user.createdAt,
+});
+
 // @desc    Register a new player / user
 // @route   POST /api/auth/signup
 export const signup = async (req, res) => {
   try {
-    const { username, name, email, password, specialty, characterClass } = req.body;
+    const { username, name, email, password, specialty, characterClass, companionMon } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({
@@ -27,7 +52,6 @@ export const signup = async (req, res) => {
       });
     }
 
-    // Check if email or username already in use
     const userExists = await User.findOne({
       $or: [
         { email: email.toLowerCase().trim() },
@@ -40,7 +64,6 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: `${field} is already registered` });
     }
 
-    // Create user with default Level 1 RPG stats
     const user = await User.create({
       username: username.toLowerCase().trim(),
       name: name ? name.trim() : username.trim(),
@@ -48,15 +71,23 @@ export const signup = async (req, res) => {
       password,
       specialty: specialty || 'electric',
       characterClass: characterClass || 'WARRIOR',
+      companionMon: companionMon || (specialty === 'electric' ? 'pikachu' : 'charmander'),
       level: 1,
+      xp: 0,
       currentXP: 0,
       nextLevelXP: 100,
-      gold: 50,
-      currentStreak: 0,
-      strength: 10,
-      intellect: 10,
-      vitality: 10,
-      discipline: 10,
+      gold: 150,
+      streak: 1,
+      currentStreak: 1,
+      str: 15,
+      int: 20,
+      wis: 12,
+      agi: 14,
+      hp: 100,
+      inventory: [
+        { itemId: 'rare_candy', name: 'Rare Candy', desc: 'Instantly grants +100 XP', icon: '🍬', qty: 2 },
+        { itemId: 'hyper_potion', name: 'Hyper Potion', desc: 'Restores +50 HP Stamina', icon: '🧪', qty: 3 },
+      ],
     });
 
     const token = generateToken(user._id);
@@ -64,24 +95,7 @@ export const signup = async (req, res) => {
     return res.status(201).json({
       message: 'Trainer profile initialized successfully!',
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        email: user.email,
-        specialty: user.specialty,
-        characterClass: user.characterClass,
-        level: user.level,
-        currentXP: user.currentXP,
-        nextLevelXP: user.nextLevelXP,
-        gold: user.gold,
-        currentStreak: user.currentStreak,
-        strength: user.strength,
-        intellect: user.intellect,
-        vitality: user.vitality,
-        discipline: user.discipline,
-        createdAt: user.createdAt,
-      },
+      user: formatUser(user),
     });
   } catch (error) {
     console.error('Signup error:', error);
@@ -101,7 +115,6 @@ export const login = async (req, res) => {
 
     const cleanIdentifier = email.toLowerCase().trim();
 
-    // Support login via either email or username
     const user = await User.findOne({
       $or: [{ email: cleanIdentifier }, { username: cleanIdentifier }],
     }).select('+password');
@@ -120,24 +133,7 @@ export const login = async (req, res) => {
     return res.status(200).json({
       message: 'Login successful!',
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        email: user.email,
-        specialty: user.specialty,
-        characterClass: user.characterClass,
-        level: user.level,
-        currentXP: user.currentXP,
-        nextLevelXP: user.nextLevelXP,
-        gold: user.gold,
-        currentStreak: user.currentStreak,
-        strength: user.strength,
-        intellect: user.intellect,
-        vitality: user.vitality,
-        discipline: user.discipline,
-        createdAt: user.createdAt,
-      },
+      user: formatUser(user),
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -155,27 +151,26 @@ export const getMe = async (req, res) => {
     }
 
     return res.status(200).json({
-      user: {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        email: user.email,
-        specialty: user.specialty,
-        characterClass: user.characterClass,
-        level: user.level,
-        currentXP: user.currentXP,
-        nextLevelXP: user.nextLevelXP,
-        gold: user.gold,
-        currentStreak: user.currentStreak,
-        strength: user.strength,
-        intellect: user.intellect,
-        vitality: user.vitality,
-        discipline: user.discipline,
-        createdAt: user.createdAt,
-      },
+      user: formatUser(user),
     });
   } catch (error) {
     console.error('GetMe error:', error);
     return res.status(500).json({ error: 'Server error fetching user profile' });
+  }
+};
+
+// @desc    Change starter Pokemon companion
+// @route   PATCH /api/auth/companion
+export const updateCompanion = async (req, res) => {
+  try {
+    const { companionMon } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { companionMon },
+      { new: true }
+    );
+    return res.status(200).json({ user: formatUser(user) });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 };

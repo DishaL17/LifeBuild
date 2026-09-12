@@ -49,43 +49,94 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    xp: {
+      type: Number,
+      default: 0,
+    },
     nextLevelXP: {
       type: Number,
       default: 100,
     },
     gold: {
       type: Number,
-      default: 50,
+      default: 150,
     },
     currentStreak: {
       type: Number,
-      default: 0,
+      default: 1,
+    },
+    streak: {
+      type: Number,
+      default: 1,
     },
     longestStreak: {
       type: Number,
-      default: 0,
+      default: 1,
     },
     lastActiveDate: {
       type: Date,
       default: null,
     },
 
-    // RPG Core Attributes
+    // Companion Pokemon
+    companionMon: {
+      type: String,
+      default: 'charmander', // charmander, pikachu, squirtle, bulbasaur
+    },
+
+    // RPG Core Attributes (aligned with Dashboard & License)
+    str: {
+      type: Number,
+      default: 15,
+    },
+    int: {
+      type: Number,
+      default: 20,
+    },
+    wis: {
+      type: Number,
+      default: 12,
+    },
+    agi: {
+      type: Number,
+      default: 14,
+    },
+    hp: {
+      type: Number,
+      default: 100,
+    },
     strength: {
       type: Number,
-      default: 10,
+      default: 15,
     },
     intellect: {
       type: Number,
-      default: 10,
+      default: 20,
     },
     vitality: {
       type: Number,
-      default: 10,
+      default: 100,
     },
     discipline: {
       type: Number,
-      default: 10,
+      default: 14,
+    },
+
+    // Trainer Inventory
+    inventory: [
+      {
+        itemId: { type: String, required: true },
+        name: { type: String, required: true },
+        desc: { type: String },
+        icon: { type: String, default: '🎒' },
+        qty: { type: Number, default: 1 },
+      },
+    ],
+
+    // Unlocked Gym Badges
+    unlockedBadges: {
+      type: [String],
+      default: [],
     },
   },
   {

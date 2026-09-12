@@ -1,18 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Achievements.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const BADGE_DEFINITIONS = [
+  { id: 'boulder', name: 'Boulder Badge', desc: 'Reached Trainer Level 5', icon: '🪨', check: (u) => (u.level || 1) >= 5, progress: (u) => `Level ${u.level || 1} / 5` },
+  { id: 'cascade', name: 'Cascade Badge', desc: 'Reached 30 Attack (STR) Points', icon: '💧', check: (u) => (u.str || 15) >= 30, progress: (u) => `STR ${u.str || 15} / 30` },
+  { id: 'thunder', name: 'Thunder Badge', desc: 'Maintained 5-Day Active Streak', icon: '⚡', check: (u) => (u.streak || 1) >= 5, progress: (u) => `Streak ${u.streak || 1} / 5 days` },
+  { id: 'rainbow', name: 'Rainbow Badge', desc: 'Reached 30 Sp. Atk (INT) Points', icon: '🌈', check: (u) => (u.int || 20) >= 30, progress: (u) => `INT ${u.int || 20} / 30` },
+  { id: 'soul', name: 'Soul Badge', desc: 'Reached 30 Sp. Def (WIS) Points', icon: '🔮', check: (u) => (u.wis || 12) >= 30, progress: (u) => `WIS ${u.wis || 12} / 30` },
+  { id: 'marsh', name: 'Marsh Badge', desc: 'Reached Trainer Level 15', icon: '🌀', check: (u) => (u.level || 1) >= 15, progress: (u) => `Level ${u.level || 1} / 15` },
+  { id: 'volcano', name: 'Volcano Badge', desc: 'Reached 30 Speed (AGI) Points', icon: '🌋', check: (u) => (u.agi || 14) >= 30, progress: (u) => `AGI ${u.agi || 14} / 30` },
+  { id: 'earth', name: 'Earth Badge', desc: 'Reached Level 25 Master status', icon: '🌍', check: (u) => (u.level || 1) >= 25 || (u.unlockedBadges && u.unlockedBadges.includes('earth')), progress: (u) => `Level ${u.level || 1} / 25` },
+];
+
 export default function Achievements() {
-  const badges = [
-    { id: 1, name: 'Boulder Badge', desc: 'Reached Trainer Level 5', icon: '🪨', unlocked: true },
-    { id: 2, name: 'Cascade Badge', desc: 'Completed 10 Strength Tasks', icon: '💧', unlocked: true },
-    { id: 3, name: 'Thunder Badge', desc: 'Maintained 5-Day Active Streak', icon: '⚡', unlocked: true },
-    { id: 4, name: 'Rainbow Badge', desc: 'Reached 30 Intellect Points', icon: '🌈', unlocked: false },
-    { id: 5, name: 'Soul Badge', desc: 'Reached 30 Wisdom Points', icon: '🔮', unlocked: false },
-    { id: 6, name: 'Marsh Badge', desc: 'Reached Trainer Level 15', icon: '🌀', unlocked: false },
-    { id: 7, name: 'Volcano Badge', desc: 'Reached 30 Agility Points', icon: '🌋', unlocked: false },
-    { id: 8, name: 'Earth Badge', desc: 'Reached Level 25 Master', icon: '🌍', unlocked: false },
-  ];
+  const [user, setUser] = useState(() => {
+    const cached = localStorage.getItem('user');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch {}
+    }
+    return { level: 1, streak: 1, str: 15, int: 20, wis: 12, agi: 14, hp: 100 };
+  });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user);
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+      })
+      .catch((err) => console.error('Error fetching achievements:', err));
+  }, []);
+
+  const unlockedCount = BADGE_DEFINITIONS.filter((b) => b.check(user)).length;
 
   return (
     <div className="achievements-container">
@@ -22,19 +53,39 @@ export default function Achievements() {
           <Link to="/dashboard" style={{ color: '#ef4444', fontWeight: 'bold', textDecoration: 'none' }}>⬅️ Back to Dashboard</Link>
         </div>
 
-        <p style={{ color: '#a1a1aa' }}>Earn Gym Badges as you reach real-life productivity milestones!</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#18181b', padding: '0.75rem 1.2rem', borderRadius: '10px', margin: '1rem 0', border: '1px solid #27272a' }}>
+          <span style={{ color: '#a1a1aa' }}>Earn official Pokémon League Gym Badges as you hit real productivity goals!</span>
+          <span style={{ color: '#facc15', fontWeight: 'bold', fontSize: '1.1rem' }}>Badges Unlocked: {unlockedCount} / 8</span>
+        </div>
 
         <div className="badge-showcase-grid">
-          {badges.map((b) => (
-            <div key={b.id} className={`badge-card ${b.unlocked ? 'unlocked' : ''}`}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.4rem' }}>{b.icon}</div>
-              <h4 style={{ color: b.unlocked ? '#facc15' : '#71717a', margin: '0.2rem 0' }}>{b.name}</h4>
-              <p style={{ color: '#a1a1aa', fontSize: '0.75rem', margin: 0 }}>{b.desc}</p>
-              <span style={{ display: 'inline-block', marginTop: '0.6rem', fontSize: '0.7rem', fontWeight: 'bold', padding: '0.2rem 0.5rem', borderRadius: '6px', background: b.unlocked ? 'rgba(34, 197, 94, 0.2)' : '#27272a', color: b.unlocked ? '#22c55e' : '#71717a' }}>
-                {b.unlocked ? 'UNLOCKED' : 'LOCKED'}
-              </span>
-            </div>
-          ))}
+          {BADGE_DEFINITIONS.map((b) => {
+            const isUnlocked = b.check(user);
+            return (
+              <div key={b.id} className={`badge-card ${isUnlocked ? 'unlocked' : ''}`}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.4rem' }}>{b.icon}</div>
+                <h4 style={{ color: isUnlocked ? '#facc15' : '#71717a', margin: '0.2rem 0' }}>{b.name}</h4>
+                <p style={{ color: '#a1a1aa', fontSize: '0.75rem', margin: 0 }}>{b.desc}</p>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: isUnlocked ? '#38bdf8' : '#71717a', fontWeight: 'bold' }}>
+                  Progress: {b.progress(user)}
+                </div>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    marginTop: '0.6rem',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '6px',
+                    background: isUnlocked ? 'rgba(34, 197, 94, 0.2)' : '#27272a',
+                    color: isUnlocked ? '#22c55e' : '#71717a',
+                  }}
+                >
+                  {isUnlocked ? '✓ UNLOCKED' : '🔒 LOCKED'}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
