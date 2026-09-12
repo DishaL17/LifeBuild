@@ -1,3 +1,5 @@
+
+
 ﻿# 🎮 LifeBuild — Pokémon Life RPG & Habit Tracker
 
 > **Bridge the gap between mundane real-world tasks and instant gaming dopamine.**  
@@ -153,10 +155,9 @@ Judges can register a brand new account (which starts with clean 0 stats, empty 
 
 ## 🚢 Production Deployment
 
-- **Frontend:** Ready for one-click deployment to **Vercel** or **Netlify** (includes `vercel.json` and `public/_redirects` for SPA client-side routing).
-- **Backend:** Ready for deployment to **Render** or **Railway**.
+- **Frontend:** [Ready for one-click deployment to **Vercel**  (includes `vercel.json` and `public/_redirects` for SPA client-side routing).](https://life-build.vercel.app/dashboard)
+
 
 ---
 
-## 🎥 Walkthrough Video
-- **Video Demonstration Link:** *(Upload your 90-180 second screen recording to YouTube/Google Drive or embed in repo under 100MB)*
+
